@@ -1,0 +1,14 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Variables de entorno (¡Nunca subas tus contraseñas o claves!)
+.env
+
+# Archivos de base de datos SQLite (opcional, pero recomendado para que el profe cree la suya)
+*.sqlite3
+*.sqlite
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
