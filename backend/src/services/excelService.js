@@ -2,35 +2,40 @@ const ExcelJS = require('exceljs');
 const Measurement = require('../models/Measurement');
 
 class ExcelService {
-  async generateReport(fecha) {
-    // fecha viene en formato "YYYY-MM-DD" (ej: "2026-07-29")
-    const [year, month, day] = fecha.split('-').map(Number);
-    
-    // 1. DIAGNÓSTICO: Ver cómo están guardados los datos en la BD
-    const ultimoRegistro = await Measurement.query().orderBy('created_at', 'desc').first();
-    if (ultimoRegistro) {
-      console.log('🔎 Último registro en BD:', ultimoRegistro.created_at, '(Tipo:', typeof ultimoRegistro.created_at, ')');
-    } else {
-      console.log('⚠️ La base de datos está vacía.');
+  async generateReport(fechaHoraInicio, fechaHoraFin) {
+    console.log('📅 Recibido inicio:', fechaHoraInicio, 'fin:', fechaHoraFin);
+
+    // 1. Asegurar que el formato tenga segundos (ej: '2026-07-29T00:00' -> '2026-07-29T00:00:00')
+    const inicioStrFmt = fechaHoraInicio.length === 16 ? fechaHoraInicio + ':00' : fechaHoraInicio;
+    const finStrFmt = fechaHoraFin.length === 16 ? fechaHoraFin + ':00' : fechaHoraFin;
+
+    // 2. Separar la fecha en partes numéricas
+    const partsInicio = inicioStrFmt.split(/[-T:]/).map(Number);
+    const partsFin = finStrFmt.split(/[-T:]/).map(Number);
+
+    console.log('🔢 Partes inicio:', partsInicio);
+    console.log('🔢 Partes fin:', partsFin);
+
+    const [y1, m1, d1, h1, min1, s1] = partsInicio;
+    const [y2, m2, d2, h2, min2, s2] = partsFin;
+
+    // 3. Validar que se hayan convertido correctamente a números
+    if (isNaN(y1) || isNaN(y2)) {
+      console.error('❌ Error: Las fechas no se pudieron parsear correctamente.');
       return null;
     }
 
-    // 2. Calcular el rango en UTC (Ecuador es UTC-5)
-    // Inicio: 29/07/2026 00:00:00 hora Ecuador = 29/07/2026 05:00:00 UTC
-    const inicioUTC = new Date(Date.UTC(year, month - 1, day, 5, 0, 0));
-    // Fin: 29/07/2026 23:59:59 hora Ecuador = 30/07/2026 04:59:59 UTC
-    const finUTC = new Date(Date.UTC(year, month - 1, day + 1, 4, 59, 59));
+    // 4. Calcular UTC (Ecuador es UTC-5, por lo que SUMAMOS 5 horas a la hora local para obtener UTC)
+    const inicioUTC = new Date(Date.UTC(y1, m1 - 1, d1, h1 + 5, min1, s1 || 0));
+    const finUTC = new Date(Date.UTC(y2, m2 - 1, d2, h2 + 5, min2, s2 || 59));
 
-    // 3. Forzar formato ISO String para la consulta (SQLite lo entiende mejor así)
-    const inicioStr = inicioUTC.toISOString();
-    const finStr = finUTC.toISOString();
+    console.log('🌍 Inicio UTC:', inicioUTC.toISOString());
+    console.log('🌍 Fin UTC:', finUTC.toISOString());
 
-    console.log(`🔍 Buscando entre: ${inicioStr} y ${finStr}`);
-
-    // 4. Buscar usando los strings ISO
+    // 5. Buscar en la base de datos
     const registros = await Measurement.query()
-      .where('created_at', '>=', inicioStr)
-      .where('created_at', '<=', finStr)
+      .where('created_at', '>=', inicioUTC.toISOString())
+      .where('created_at', '<=', finUTC.toISOString())
       .orderBy('created_at', 'asc');
 
     console.log(`📊 Registros encontrados: ${registros.length}`);
@@ -39,7 +44,7 @@ class ExcelService {
       return null;
     }
 
-    // 5. Crear libro de Excel
+    // 6. Crear libro de Excel
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Datos DHT11');
 
@@ -57,12 +62,22 @@ class ExcelService {
     headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
     headerRow.height = 20;
 
-    // 6. Agregar datos ajustados a hora de Ecuador
+    const offsetEcuador = 5 * 60 * 60 * 1000;
+
+    // 7. Agregar datos con manejo seguro de fechas
     registros.forEach(reg => {
-      // Aseguramos que sea un objeto Date válido
-      const fechaObj = new Date(reg.created_at);
-      const offsetEcuador = 5 * 60 * 60 * 1000;
-      const fechaLocal = new Date(fechaObj.getTime() - offsetEcuador);
+      let fechaLocal;
+      try {
+        const fechaObj = new Date(reg.created_at);
+        if (isNaN(fechaObj.getTime())) {
+          console.warn('⚠️ Fecha inválida en BD:', reg.created_at);
+          return; // Saltar este registro si la fecha está corrupta
+        }
+        fechaLocal = new Date(fechaObj.getTime() - offsetEcuador);
+      } catch (e) {
+        console.warn('⚠️ Error procesando fecha:', reg.created_at, e);
+        return;
+      }
 
       sheet.addRow({
         id: reg.id,

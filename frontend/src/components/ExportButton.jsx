@@ -1,34 +1,52 @@
-// frontend/src/components/ExportButton.jsx
 import { useState } from 'react';
 
 export default function ExportButton() {
-  const [fecha, setFecha] = useState('');
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [horaInicio, setHoraInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
+  const [horaFin, setHoraFin] = useState('');
   const [mensaje, setMensaje] = useState('');
 
   const handleDownload = async () => {
-    if (!fecha) {
-      setMensaje('⚠️ Por favor selecciona una fecha.');
+    // 1. Validar que todos los campos estén llenos
+    if (!fechaInicio || !horaInicio || !fechaFin || !horaFin) {
+      setMensaje('⚠️ Por favor completa la fecha y hora de inicio y fin.');
+      return;
+    }
+
+    // 2. Unir Fecha y Hora en un solo formato (YYYY-MM-DDTHH:mm)
+    const dateTimeInicio = `${fechaInicio}T${horaInicio}`;
+    const dateTimeFin = `${fechaFin}T${horaFin}`;
+
+    // 3. Validar que el inicio sea menor al fin
+    if (dateTimeInicio >= dateTimeFin) {
+      setMensaje('⚠️ La fecha/hora de inicio debe ser menor a la de fin.');
       return;
     }
     
     setMensaje('⏳ Generando archivo...');
     
     try {
-      // Usamos la ruta exacta que definimos en el backend modular
-      const response = await fetch(`http://localhost:3001/api/measurements/export/excel?fecha=${fecha}`);
+      // Enviamos los datos unidos al backend
+      const url = `http://localhost:3001/api/measurements/export/excel?fechaHoraInicio=${dateTimeInicio}&fechaHoraFin=${dateTimeFin}`;
+      const response = await fetch(url);
       
       if (response.ok) {
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+        const urlBlob = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `reporte_domotico_${fecha}.xlsx`;
+        a.href = urlBlob;
+        
+        // Limpiamos el nombre del archivo para que sea válido en Windows
+        const nombreArchivo = `reporte_domotico_${dateTimeInicio.replace('T', '_').replace(':', '-')}_a_${dateTimeFin.replace('T', '_').replace(':', '-')}.xlsx`;
+        a.download = nombreArchivo;
+        
         document.body.appendChild(a);
         a.click();
         a.remove();
         setMensaje('✅ Descarga exitosa.');
       } else {
-        setMensaje('❌ No hay datos para esa fecha.');
+        setMensaje(' No hay datos en ese periodo de tiempo.');
       }
     } catch (error) {
       setMensaje('❌ Error de conexión con el servidor.');
@@ -37,29 +55,77 @@ export default function ExportButton() {
 
   return (
     <div className="bg-gray-900 p-6 rounded-lg shadow-xl border border-gray-700">
-      <h2 className="text-white text-lg font-bold mb-4">📥 Exportar Reporte Histórico</h2>
-      <div className="flex flex-col md:flex-row gap-4 items-end">
-        <div className="flex-1 w-full">
-          <label className="text-gray-400 text-sm mb-1 block">Selecciona el día a consultar:</label>
-          <input 
-            type="date" 
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            className="w-full bg-gray-800 text-white border border-gray-600 rounded p-2 focus:outline-none focus:border-blue-500"
-          />
+      <h2 className="text-white text-lg font-bold mb-4">📥 Exportar Reporte por Periodo</h2>
+      
+      {/* Contenedor de los 4 casilleros */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        
+        {/* BLOQUE INICIO */}
+        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+          <h3 className="text-blue-400 text-sm font-bold mb-3 uppercase tracking-wider">🟢 Periodo de Inicio</h3>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-gray-400 text-xs mb-1 block">Fecha:</label>
+              <input 
+                type="date" 
+                value={fechaInicio}
+                onChange={(e) => setFechaInicio(e.target.value)}
+                className="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-gray-400 text-xs mb-1 block">Hora:</label>
+              <input 
+                type="time" 
+                value={horaInicio}
+                onChange={(e) => setHoraInicio(e.target.value)}
+                className="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
         </div>
-        <button 
-          onClick={handleDownload}
-          className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition duration-200 flex items-center justify-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          Descargar Excel
-        </button>
+
+        {/* BLOQUE FIN */}
+        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+          <h3 className="text-orange-400 text-sm font-bold mb-3 uppercase tracking-wider">🔴 Periodo de Fin</h3>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-gray-400 text-xs mb-1 block">Fecha:</label>
+              <input 
+                type="date" 
+                value={fechaFin}
+                onChange={(e) => setFechaFin(e.target.value)}
+                className="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-orange-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-gray-400 text-xs mb-1 block">Hora:</label>
+              <input 
+                type="time" 
+                value={horaFin}
+                onChange={(e) => setHoraFin(e.target.value)}
+                className="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+        </div>
+
       </div>
+
+      {/* Botón de Descarga */}
+      <button 
+        onClick={handleDownload}
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition duration-200 flex items-center justify-center gap-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Descargar Excel
+      </button>
+
+      {/* Mensajes de estado */}
       {mensaje && (
-        <p className={`mt-3 text-sm font-medium ${mensaje.includes('✅') ? 'text-green-400' : mensaje.includes('❌') || mensaje.includes('⚠️') ? 'text-red-400' : 'text-yellow-400'}`}>
+        <p className={`mt-3 text-sm font-medium text-center ${mensaje.includes('✅') ? 'text-green-400' : mensaje.includes('❌') || mensaje.includes('⚠️') ? 'text-red-400' : 'text-yellow-400'}`}>
           {mensaje}
         </p>
       )}
