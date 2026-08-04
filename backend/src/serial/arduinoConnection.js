@@ -7,20 +7,36 @@ const BAUD_RATE = 9600;
 
 let latestSensorData = { temperature: 0, humidity: 0 };
 let port = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 10; // Límite de reintentos
+const RECONNECT_DELAY = 10000; // 10 segundos entre reintentos (más largo para evitar colapsos)
 
 function openSerialPort() {
   try {
-    if (port) port.close();
+    if (port && port.isOpen) {
+      port.close();
+    }
 
     port = new SerialPort({ path: PORT_NAME, baudRate: BAUD_RATE, autoOpen: false });
     const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
     port.open((err) => {
       if (err) {
-        console.error('❌ Error abriendo puerto:', err.message);
-        setTimeout(openSerialPort, 5000);
+        reconnectAttempts++;
+        console.error(`❌ Error abriendo puerto (intento ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}):`, err.message);
+        
+        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+          console.error('⚠️ Límite de reintentos alcanzado. Deteniendo reconexión automática.');
+          console.error('💡 Solución: Cierra el Monitor Serial de Arduino IDE y reinicia el backend.');
+          return;
+        }
+        
+        setTimeout(openSerialPort, RECONNECT_DELAY);
         return;
       }
+      
+      // Resetear contador al conectar exitosamente
+      reconnectAttempts = 0;
       console.log('🔌 Puerto serial abierto correctamente');
     });
 
@@ -39,7 +55,6 @@ function openSerialPort() {
         latestSensorData = { temperature: temp, humidity: hum };
         console.log(`✅ Arduino: Temp ${temp}°C | Hum ${hum}%`);
 
-        // Guardar usando el servicio
         try {
           await measurementService.create({ temperature: temp, humidity: hum });
           console.log('💾 Guardado en SQLite');
@@ -51,12 +66,25 @@ function openSerialPort() {
 
     port.on('error', (err) => {
       console.error('❌ Error en puerto serial:', err.message);
-      setTimeout(openSerialPort, 5000);
+      reconnectAttempts++;
+      
+      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        setTimeout(openSerialPort, RECONNECT_DELAY);
+      }
+    });
+
+    port.on('close', () => {
+      console.log('⚠️ Puerto cerrado');
+      reconnectAttempts = 0;
     });
 
   } catch (error) {
-    console.error('❌ No se pudo abrir el puerto:', error.message);
-    setTimeout(openSerialPort, 5000);
+    console.error(' No se pudo abrir el puerto:', error.message);
+    reconnectAttempts++;
+    
+    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+      setTimeout(openSerialPort, RECONNECT_DELAY);
+    }
   }
 }
 
