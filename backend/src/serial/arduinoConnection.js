@@ -2,14 +2,18 @@ const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const measurementService = require('../services/measurementService');
 
-const PORT_NAME = 'COM4'; // Cambia si es necesario
+const PORT_NAME = 'COM4';
 const BAUD_RATE = 9600;
 
 let latestSensorData = { temperature: 0, humidity: 0 };
 let port = null;
 let reconnectAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 10; // Límite de reintentos
-const RECONNECT_DELAY = 10000; // 10 segundos entre reintentos (más largo para evitar colapsos)
+const MAX_RECONNECT_ATTEMPTS = 10;
+const RECONNECT_DELAY = 10000;
+
+// Cola de comandos pendientes para Arduino
+let pendingCommand = null;
+let commandResolve = null;
 
 function openSerialPort() {
   try {
@@ -26,48 +30,54 @@ function openSerialPort() {
         console.error(`❌ Error abriendo puerto (intento ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}):`, err.message);
         
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-          console.error('⚠️ Límite de reintentos alcanzado. Deteniendo reconexión automática.');
-          console.error('💡 Solución: Cierra el Monitor Serial de Arduino IDE y reinicia el backend.');
+          console.error('⚠️ Límite de reintentos alcanzado.');
           return;
         }
-        
         setTimeout(openSerialPort, RECONNECT_DELAY);
         return;
       }
       
-      // Resetear contador al conectar exitosamente
       reconnectAttempts = 0;
       console.log('🔌 Puerto serial abierto correctamente');
     });
 
     parser.on('data', async (line) => {
       const trimmedLine = line.trim();
-      if (!trimmedLine || trimmedLine.includes('iniciado')) return;
+      if (!trimmedLine) return;
 
-      console.log('📩 Recibido:', trimmedLine);
-      
-      const match = trimmedLine.match(/Temperatura:\s*([\d.]+)\s*°C\s*y\s*Humedad:\s*([\d.]+)%/);
+      // Si es respuesta a un comando pendiente
+      if (commandResolve && (trimmedLine.includes('LED_ENCENDIDO') || trimmedLine.includes('LED_APAGADO'))) {
+        commandResolve(trimmedLine);
+        commandResolve = null;
+        pendingCommand = null;
+        return;
+      }
 
-      if (match) {
-        const temp = parseFloat(match[1]);
-        const hum = parseFloat(match[2]);
+      // Si es dato del sensor
+      if (trimmedLine.includes('Temperatura:')) {
+        const match = trimmedLine.match(/Temperatura:\s*([\d.]+)\s*°C\s*y\s*Humedad:\s*([\d.]+)%/);
+        if (match) {
+          const temp = parseFloat(match[1]);
+          const hum = parseFloat(match[2]);
+          latestSensorData = { temperature: temp, humidity: hum };
+          console.log(`✅ Arduino: Temp ${temp}°C | Hum ${hum}%`);
 
-        latestSensorData = { temperature: temp, humidity: hum };
-        console.log(`✅ Arduino: Temp ${temp}°C | Hum ${hum}%`);
-
-        try {
-          await measurementService.create({ temperature: temp, humidity: hum });
-          console.log('💾 Guardado en SQLite');
-        } catch (dbError) {
-          console.error('❌ Error en base de datos:', dbError.message);
+          try {
+            await measurementService.create({ temperature: temp, humidity: hum });
+          } catch (dbError) {
+            console.error('❌ Error en base de datos:', dbError.message);
+          }
         }
       }
     });
 
     port.on('error', (err) => {
       console.error('❌ Error en puerto serial:', err.message);
+      if (commandResolve) {
+        commandResolve('ERROR');
+        commandResolve = null;
+      }
       reconnectAttempts++;
-      
       if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
         setTimeout(openSerialPort, RECONNECT_DELAY);
       }
@@ -79,13 +89,39 @@ function openSerialPort() {
     });
 
   } catch (error) {
-    console.error(' No se pudo abrir el puerto:', error.message);
-    reconnectAttempts++;
-    
-    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-      setTimeout(openSerialPort, RECONNECT_DELAY);
-    }
+    console.error('❌ No se pudo abrir el puerto:', error.message);
   }
 }
 
-module.exports = { openSerialPort, getLatestData: () => latestSensorData };
+// Función para enviar comandos al Arduino
+function sendCommandToArduino(comando) {
+  return new Promise((resolve, reject) => {
+    if (!port || !port.isOpen) {
+      return reject(new Error('Puerto serial no está abierto'));
+    }
+
+    commandResolve = resolve;
+    pendingCommand = comando;
+
+    port.write(comando + '\n', (err) => {
+      if (err) {
+        commandResolve = null;
+        pendingCommand = null;
+        reject(err);
+      } else {
+        console.log(` Comando enviado al Arduino: ${comando}`);
+      }
+    });
+
+    // Timeout de 5 segundos
+    setTimeout(() => {
+      if (commandResolve) {
+        commandResolve('TIMEOUT');
+        commandResolve = null;
+        pendingCommand = null;
+      }
+    }, 5000);
+  });
+}
+
+module.exports = { openSerialPort, getLatestData: () => latestSensorData, sendCommandToArduino };
