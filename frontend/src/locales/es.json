@@ -1,0 +1,163 @@
+{
+  "header": {
+    "institution": "Tecnológico Universitario Rumiñahui",
+    "subject": "Asignatura de Reutilización de Software",
+    "project": "Proyecto: Monitoreo Ambiental DHT11 con Arduino Uno"
+  },
+
+  "measurement": {
+    "last": "Última medición"
+  },
+
+"sensors": {
+  "temperature": "Temperatura",
+  "humidity": "Humedad",
+  "history": "Historial en tiempo real",
+  "temperatureChart": "Temperatura (°C)",
+  "humidityChart": "Humedad (%)"
+},
+
+"forecast": {
+  "sunny": "Soleado",
+  "humidNight": "Noche Húmeda",
+  "coldNight": "Noche Fría",
+  "clearNight": "Noche Despejada",
+  "cold": "Frío",
+  "hot": "Caluroso",
+  "rainy": "Lluvioso",
+  "pleasant": "Agradable",
+  "warm": "Cálido",
+  "stable": "Estable"
+}, 
+
+  "connection": {
+  "connected": "Conectado al Backend",
+  "disconnected": "Desconectado del Backend"
+},
+
+  "states": {
+    "loading": "Conectando con el panel de sensores...",
+    "emptyTitle": "Esperando la primera medición del sensor...",
+    "emptyDescription": "Verifica que el Arduino esté conectado y enviando datos por el puerto serial. El panel se actualizará automáticamente en cuanto llegue el primer registro.",
+    "backendOffline": "No se pudo conectar con el backend. Verifica que el servidor esté corriendo en",
+    "backendOfflineEnd": "Los datos que ves abajo podrían estar desactualizados."
+  },
+
+  "balthazar": {
+    "subtitle": "Asistente ambiental",
+    "thinking": "Balthazar está pensando...",
+    "currentState": "Estado actual",
+    "ariaLabel": "Abrir asistente Balthazar",
+
+    "states": {
+      "noData": "sin datos"
+    },
+
+    "buttons": {
+      "temperature": "🌡️ Temperatura",
+      "humidity": "💧 Humedad",
+      "history": "📊 Histórico",
+      "trend": "📈 Tendencia",
+      "advice": "💡 Consejo",
+      "connection": "📡 Conexión",
+      "connectionStatus": "📡 Estado de conexión"
+    },
+
+    "messages": {
+      "noConnection": "Ahora mismo no tengo conexión con el sistema. No puedo conocer la temperatura ni la humedad actuales. Cuando vuelva la conexión, podré analizar las mediciones.",
+
+      "loading": "Todavía estoy esperando los datos del sensor. Aún no tengo una medición real para analizar.",
+
+      "noData": "Todavía no tengo datos reales del sensor. No quiero inventarme una temperatura o una humedad que no conozco. Cuando lleguen las mediciones, podré analizarlas.",
+
+      "noDataShort": "Todavía no tengo datos reales del sensor. Cuando el sistema envíe una medición válida, podré ayudarte a interpretarla.",
+
+      "start": "¡Hola! Soy Balthazar, tu asistente del panel ambiental. Puedo ayudarte a interpretar la temperatura, la humedad y el comportamiento de los sensores.",
+
+      "measurements": "Actualmente tenemos {{temperature}} °C de temperatura y {{humidity}}% de humedad. Vamos a ver qué significan estos valores.",
+
+      "temperature": {
+        "low": "La temperatura actual es de {{temperature}} °C. Está relativamente baja, así que el ambiente se encuentra fresco.",
+        "normal": "La temperatura actual es de {{temperature}} °C. Se encuentra dentro de un rango bastante agradable para un ambiente interior.",
+        "warm": "La temperatura actual es de {{temperature}} °C. El ambiente comienza a estar bastante cálido. Conviene vigilar cómo continúa la tendencia.",
+        "high": "Tenemos {{temperature}} °C. ¡Eso ya está bastante caliente! Sería recomendable revisar las condiciones del ambiente."
+      },
+
+      "humidity": {
+        "low": "La humedad está en {{humidity}}%. Es relativamente baja, por lo que el ambiente puede sentirse seco.",
+        "normal": "La humedad actual es de {{humidity}}%. Se encuentra en un rango bastante equilibrado.",
+        "high": "La humedad está en {{humidity}}%. Es algo elevada, aunque todavía no necesariamente representa un problema.",
+        "veryHigh": "La humedad está en {{humidity}}%. Es bastante alta, así que conviene vigilar el ambiente y su evolución."
+      },
+
+      "history": {
+        "none": "No tengo registros históricos disponibles todavía.",
+        "one": "Tengo un registro, pero necesito al menos dos mediciones para poder comparar la evolución del ambiente.",
+        "many": "Tengo {{count}} registros históricos. Con ellos puedo observar cómo han cambiado la temperatura y la humedad a lo largo del tiempo."
+      },
+
+      "trend": {
+        "notEnough": "Necesito al menos dos mediciones para determinar una tendencia.",
+        "invalid": "Tengo registros históricos, pero no puedo identificar correctamente la temperatura en ellos.",
+        "increasing": "La última medición muestra que la temperatura está aumentando respecto al registro anterior.",
+        "decreasing": "La última medición muestra que la temperatura está disminuyendo respecto al registro anterior.",
+        "stable": "La temperatura se mantiene prácticamente estable entre las últimas mediciones."
+      },
+
+      "connection": "El panel está conectado con el sistema y puede recibir las mediciones del sensor.",
+
+      "advice": {
+        "bothHigh": "La combinación de temperatura y humedad es bastante elevada. Conviene vigilar el ambiente y mantener una buena ventilación.",
+        "bothLow": "El ambiente está fresco y relativamente seco. Puedes observar si estas condiciones se mantienen durante las siguientes mediciones.",
+        "humidityHigh": "La humedad está elevada. Te recomiendo observar su evolución en el gráfico histórico.",
+        "temperatureHigh": "La temperatura está elevada. Lo mejor es revisar el comportamiento de las siguientes mediciones.",
+        "stable": "Las condiciones actuales parecen relativamente estables. Puedes revisar el histórico para observar si existe alguna tendencia."
+      },
+
+      "default": "Estoy aquí para ayudarte a interpretar el comportamiento del panel ambiental."
+    }
+  },
+
+  "footer": {
+    "institution": "Tecnológico Universitario Rumiñahui",
+    "career": "Carrera de Sistemas y Gestión de Data",
+    "project": "Proyecto: Monitoreo Ambiental DHT11",
+    "subject": "Asignatura: Reutilización de Software",
+    "rights": "Todos los derechos reservados.",
+    "developedWith": "Desarrollado con Arduino, Node.js y React",
+    "version": "v1.0 | Panel de Instrumentos Domótico"
+  }, 
+  "deviceControl": {
+  "title": "Control del Foco",
+  "status": {
+    "on": "ENCENDIDO",
+    "off": "APAGADO"
+  },
+  "buttons": {
+    "on": "Encender",
+    "off": "Apagar"
+  },
+  "messages": {
+    "turnedOn": "Foco ENCENDIDO correctamente",
+    "turnedOff": "Foco APAGADO correctamente",
+    "controlError": "Error al controlar el foco",
+    "connectionError": "Error de conexión con el servidor"
+  }
+}, 
+"export": {
+  "title": "📥 Exportar Reporte por Periodo",
+  "startPeriod": "🟢 Periodo de Inicio",
+  "endPeriod": "🔴 Periodo de Fin",
+  "date": "Fecha:",
+  "time": "Hora:",
+  "download": "Descargar Excel",
+  "messages": {
+    "completeFields": "⚠️ Por favor completa la fecha y hora de inicio y fin.",
+    "invalidRange": "⚠️ La fecha/hora de inicio debe ser menor a la de fin.",
+    "generating": "⏳ Generando archivo...",
+    "success": "✅ Descarga exitosa.",
+    "noData": "⚠️ No hay datos en ese periodo de tiempo.",
+    "connectionError": "❌ Error de conexión con el servidor."
+  }
+}
+}

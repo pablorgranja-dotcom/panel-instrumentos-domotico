@@ -2,10 +2,8 @@ const express = require('express');
 const router = express.Router();
 const VehicleData = require('../models/VehicleData');
 
-// Ruta 1: Guardar datos del vehículo
 router.post('/save', async (req, res) => {
   try {
-    // Creamos un nuevo registro con los datos que nos envía el frontend
     const nuevoRegistro = new VehicleData(req.body);
     await nuevoRegistro.save();
     res.status(201).json({ mensaje: 'Datos guardados correctamente' });

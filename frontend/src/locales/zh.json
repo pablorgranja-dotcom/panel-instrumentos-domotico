@@ -1,0 +1,163 @@
+{
+  "header": {
+    "institution": "鲁米尼亚维大学技术学院",
+    "subject": "软件复用课程",
+    "project": "项目：使用 Arduino Uno 的 DHT11 环境监测"
+  },
+
+  "states": {
+    "loading": "正在连接传感器面板...",
+    "emptyTitle": "正在等待传感器的第一次测量...",
+    "emptyDescription": "请确认 Arduino 已连接并通过串行端口发送数据。收到第一条记录后，面板将自动更新。",
+    "backendOffline": "无法连接到后端。请确认服务器正在运行于",
+    "backendOfflineEnd": "下面显示的数据可能已经过时。"
+  },
+
+  "measurement": {
+    "last": "最后一次测量"
+  },
+
+  "sensors": {
+  "temperature": "温度",
+  "humidity": "湿度",
+  "history": "实时历史记录",
+  "temperatureChart": "温度 (°C)",
+  "humidityChart": "湿度 (%)"
+},
+
+"forecast": {
+  "sunny": "晴朗",
+  "humidNight": "潮湿的夜晚",
+  "coldNight": "寒冷的夜晚",
+  "clearNight": "晴朗的夜晚",
+  "cold": "寒冷",
+  "hot": "炎热",
+  "rainy": "下雨",
+  "pleasant": "舒适",
+  "warm": "温暖",
+  "stable": "稳定"
+},
+
+  "connection": {
+  "connected": "已连接到后端",
+  "disconnected": "未连接到后端"
+},
+
+  "footer": {
+    "institution": "鲁米尼亚维大学技术学院",
+    "career": "系统与数据管理专业",
+    "project": "项目：DHT11 环境监测",
+    "subject": "课程：软件复用",
+    "rights": "版权所有。",
+    "developedWith": "使用 Arduino、Node.js 和 React 开发",
+    "version": "v1.0 | 智能家居仪表盘"
+  },
+
+  "balthazar": {
+    "subtitle": "环境助手",
+    "thinking": "Balthazar 正在思考...",
+    "currentState": "当前状态",
+    "ariaLabel": "打开 Balthazar 助手",
+
+    "states": {
+      "noData": "无数据"
+    },
+
+    "buttons": {
+      "temperature": "🌡️ 温度",
+      "humidity": "💧 湿度",
+      "history": "📊 历史记录",
+      "trend": "📈 趋势",
+      "advice": "💡 建议",
+      "connection": "📡 连接",
+      "connectionStatus": "📡 连接状态"
+    },
+
+    "messages": {
+      "noConnection": "目前无法连接到系统，因此我无法获取当前的温度和湿度数据。连接恢复后，我就可以分析传感器测量结果了。",
+
+      "loading": "我还在等待传感器数据。目前还没有真实的测量结果可以分析。",
+
+      "noData": "目前还没有真实的传感器数据。我不想随意编造不知道的温度或湿度。收到测量数据后，我就可以进行分析。",
+
+      "noDataShort": "目前还没有真实的传感器数据。系统发送有效测量结果后，我就可以帮助你进行分析。",
+
+      "start": "你好！我是 Balthazar，你的环境监测面板助手。我可以帮助你分析温度、湿度以及传感器的变化情况。",
+
+      "measurements": "目前温度为 {{temperature}} °C，湿度为 {{humidity}}%。让我们看看这些数据代表什么。",
+
+      "temperature": {
+        "low": "当前温度为 {{temperature}} °C。温度相对较低，环境比较凉爽。",
+        "normal": "当前温度为 {{temperature}} °C。对于室内环境来说，这是一个比较舒适的温度范围。",
+        "warm": "当前温度为 {{temperature}} °C。环境开始变得比较温暖，建议继续观察温度趋势。",
+        "high": "当前温度达到 {{temperature}} °C。这个温度已经比较高了！建议检查当前环境状况。"
+      },
+
+      "humidity": {
+        "low": "当前湿度为 {{humidity}}%。湿度相对较低，环境可能会感觉比较干燥。",
+        "normal": "当前湿度为 {{humidity}}%。湿度处于比较平衡的范围。",
+        "high": "当前湿度为 {{humidity}}%。湿度有些偏高，但目前不一定代表严重问题。",
+        "veryHigh": "当前湿度为 {{humidity}}%。湿度比较高，建议继续观察环境变化。"
+      },
+
+      "history": {
+        "none": "目前还没有可用的历史记录。",
+        "one": "目前只有一条记录。至少需要两次测量才能比较环境的变化。",
+        "many": "目前有 {{count}} 条历史记录。通过这些数据，我可以观察温度和湿度随时间的变化。"
+      },
+
+      "trend": {
+        "notEnough": "至少需要两次测量才能确定趋势。",
+        "invalid": "我有历史记录，但是无法正确识别其中的温度数据。",
+        "increasing": "最近一次测量显示，温度相比上一条记录正在升高。",
+        "decreasing": "最近一次测量显示，温度相比上一条记录正在降低。",
+        "stable": "最近几次测量之间的温度基本保持稳定。"
+      },
+
+      "connection": "面板已连接到系统，可以接收传感器的测量数据。",
+
+      "advice": {
+        "bothHigh": "温度和湿度同时较高。建议注意环境状况并保持良好的通风。",
+        "bothLow": "环境比较凉爽且相对干燥。可以继续观察这些条件是否保持稳定。",
+        "humidityHigh": "湿度较高。建议通过历史图表观察湿度的变化趋势。",
+        "temperatureHigh": "温度较高。建议继续观察后续的测量结果。",
+        "stable": "当前环境条件看起来比较稳定。可以查看历史记录来观察是否存在明显趋势。"
+      },
+
+      "default": "我可以帮助你分析环境监测面板的数据变化。"
+    }
+  }, 
+  "deviceControl": {
+  "title": "灯光控制",
+  "status": {
+    "on": "已开启",
+    "off": "已关闭"
+  },
+  "buttons": {
+    "on": "打开",
+    "off": "关闭"
+  },
+  "messages": {
+    "turnedOn": "灯光已成功开启",
+    "turnedOff": "灯光已成功关闭",
+    "controlError": "控制灯光时发生错误",
+    "connectionError": "服务器连接错误"
+  }
+},
+"export": {
+  "title": "📥 按时间段导出报告",
+  "startPeriod": "🟢 开始时间",
+  "endPeriod": "🔴 结束时间",
+  "date": "日期：",
+  "time": "时间：",
+  "download": "下载 Excel",
+  "messages": {
+    "completeFields": "⚠️ 请填写开始和结束的日期及时间。",
+    "invalidRange": "⚠️ 开始日期/时间必须早于结束日期/时间。",
+    "generating": "⏳ 正在生成文件...",
+    "success": "✅ 下载成功。",
+    "noData": "⚠️ 该时间段内没有数据。",
+    "connectionError": "❌ 服务器连接错误。"
+  }
+}
+}

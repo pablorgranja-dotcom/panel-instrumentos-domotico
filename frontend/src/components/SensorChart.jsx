@@ -1,6 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Activity } from 'lucide-react';
 import { COLORS } from '../theme';
+
+
 
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -17,6 +20,7 @@ function ChartTooltip({ active, payload, label }) {
 }
 
 export default function SensorChart({ historial }) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-2xl border border-line bg-surface p-5 shadow-lg shadow-black/20 sm:p-6">
       <div className="mb-5 flex items-center gap-2.5">
@@ -24,7 +28,7 @@ export default function SensorChart({ historial }) {
           <Activity size={17} strokeWidth={2.25} />
         </span>
         <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-          Historial en tiempo real
+          {t("sensors.history")}
         </h2>
       </div>
 
@@ -68,7 +72,7 @@ export default function SensorChart({ historial }) {
             stroke={COLORS.temp}
             strokeWidth={2}
             dot={false}
-            name="Temperatura (°C)"
+            name={t("sensors.temperatureChart")}
             isAnimationActive={false}
           />
           <Line
@@ -78,7 +82,7 @@ export default function SensorChart({ historial }) {
             stroke={COLORS.humidity}
             strokeWidth={2}
             dot={false}
-            name="Humedad (%)"
+            name={t("sensors.humidityChart")}
             isAnimationActive={false}
           />
         </LineChart>
