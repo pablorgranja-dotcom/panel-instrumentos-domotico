@@ -46,6 +46,7 @@ function App() {
     <div className="min-h-screen bg-gray-800 p-4 md:p-8 flex flex-col font-sans">
       {/* Encabezado */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 max-w-6xl mx-auto w-full">
+
         <div>
           <h1 className="text-white text-3xl md:text-4xl font-extrabold">
             {t("header.institution", "Tecnológico Universitario Rumiñahui")}
@@ -125,6 +126,9 @@ function App() {
 
       {/* Footer */}
       <Footer />
+
+      
+
     </div>
   );
 }
