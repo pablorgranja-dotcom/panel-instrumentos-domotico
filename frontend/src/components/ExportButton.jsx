@@ -17,9 +17,11 @@ export default function ExportButton() {
       return;
     }
 
-    // 2. Unir Fecha y Hora en un solo formato (YYYY-MM-DDTHH:mm)
+    // 2. Unir Fecha y Hora en formato ISO (YYYY-MM-DDTHH:mm)
     const dateTimeInicio = `${fechaInicio}T${horaInicio}`;
     const dateTimeFin = `${fechaFin}T${horaFin}`;
+
+    console.log('📅 Enviando al backend:', { dateTimeInicio, dateTimeFin });
 
     // 3. Validar que el inicio sea menor al fin
     if (dateTimeInicio >= dateTimeFin) {
