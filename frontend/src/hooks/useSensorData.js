@@ -2,6 +2,14 @@
 import { useState, useEffect } from 'react';
 import { domoticApi } from '../services/domoticApi';
 
+const HISTORY_LIMIT = 30;
+const OFFSET_ECUADOR_MS = 5 * 60 * 60 * 1000; // created_at se guarda en UTC
+
+function formatearHora(fechaString) {
+  const fechaLocal = new Date(new Date(fechaString).getTime() - OFFSET_ECUADOR_MS);
+  return fechaLocal.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+
 export function useSensorData() {
   const [data, setData] = useState({
     temperature: 0,
@@ -10,29 +18,32 @@ export function useSensorData() {
   });
 
   const [historial, setHistorial] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Usamos nuestro servicio centralizado
-        const jsonData = await domoticApi.getLatestMeasurement();
-        setData(jsonData);
+        const [latest, history] = await Promise.all([
+          domoticApi.getLatestMeasurement(),
+          domoticApi.getHistory(HISTORY_LIMIT)
+        ]);
 
-        if (jsonData.temperature > 0) {
-          const ahora = new Date();
-          const horaFormateada = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}:${ahora.getSeconds().toString().padStart(2, '0')}`;
-          
-          setHistorial(prev => {
-            const nuevoHistorial = [...prev, {
-              hora: horaFormateada,
-              temperature: jsonData.temperature,
-              humidity: jsonData.humidity
-            }];
-            return nuevoHistorial.slice(-30);
-          });
-        }
+        setData(latest);
+
+        // El backend devuelve el historial del más reciente al más antiguo;
+        // lo invertimos para graficarlo en orden cronológico.
+        setHistorial(
+          [...history].reverse().map((registro) => ({
+            hora: formatearHora(registro.created_at),
+            temperature: registro.temperature,
+            humidity: registro.humidity
+          }))
+        );
       } catch (error) {
         console.error('Error al obtener datos del sensor:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -42,5 +53,5 @@ export function useSensorData() {
     return () => clearInterval(intervalo);
   }, []);
 
-  return { data, historial };
+  return { data, historial, loading };
 }

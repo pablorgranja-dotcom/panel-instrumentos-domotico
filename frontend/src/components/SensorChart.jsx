@@ -1,19 +1,90 @@
+import { useTranslation } from "react-i18next";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Activity } from 'lucide-react';
+import { COLORS } from '../theme';
+
+
+
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-lg border border-line bg-surface px-3 py-2 shadow-xl">
+      <p className="mb-1.5 font-mono text-xs text-ink-faint">{label}</p>
+      {payload.map((entry) => (
+        <p key={entry.dataKey} className="font-mono text-sm font-medium" style={{ color: entry.color }}>
+          {entry.name}: {entry.value?.toFixed(1)}
+        </p>
+      ))}
+    </div>
+  );
+}
 
 export default function SensorChart({ historial }) {
+  const { t } = useTranslation();
   return (
-    <div className="bg-gray-900 rounded-lg p-6 shadow-xl border border-gray-700 mt-8">
-      <h2 className="text-white text-xl font-bold mb-4 tracking-wider">📊 HISTORIAL EN TIEMPO REAL</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={historial}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#4b5563" />
-          <XAxis dataKey="hora" stroke="#9ca3af" fontSize={12} />
-          <YAxis yAxisId="temp" stroke="#3b82f6" label={{ value: '°C', angle: -90, position: 'insideLeft', fill: '#3b82f6' }} />
-          <YAxis yAxisId="hum" orientation="right" stroke="#f59e0b" label={{ value: '%', angle: 90, position: 'insideRight', fill: '#f59e0b' }} />
-          <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #4b5563', borderRadius: '8px' }} labelStyle={{ color: '#fff' }} />
-          <Legend />
-          <Line yAxisId="temp" type="monotone" dataKey="temperature" stroke="#3b82f6" strokeWidth={2} dot={false} name="Temperatura (°C)" />
-          <Line yAxisId="hum" type="monotone" dataKey="humidity" stroke="#f59e0b" strokeWidth={2} dot={false} name="Humedad (%)" />
+    <div className="rounded-2xl border border-line bg-surface p-5 shadow-lg shadow-black/20 sm:p-6">
+      <div className="mb-5 flex items-center gap-2.5">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-action/10 text-action">
+          <Activity size={17} strokeWidth={2.25} />
+        </span>
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+          {t("sensors.history")}
+        </h2>
+      </div>
+
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart data={historial} margin={{ top: 4, right: 8, bottom: 0, left: -12 }}>
+          <CartesianGrid strokeDasharray="3 6" stroke={COLORS.border} vertical={false} />
+          <XAxis
+            dataKey="hora"
+            stroke={COLORS.inkFaint}
+            tick={{ fill: COLORS.inkFaint, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
+            tickLine={false}
+            axisLine={{ stroke: COLORS.border }}
+          />
+          <YAxis
+            yAxisId="temp"
+            stroke={COLORS.temp}
+            tick={{ fill: COLORS.inkFaint, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
+            tickLine={false}
+            axisLine={false}
+            width={34}
+          />
+          <YAxis
+            yAxisId="hum"
+            orientation="right"
+            stroke={COLORS.humidity}
+            tick={{ fill: COLORS.inkFaint, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
+            tickLine={false}
+            axisLine={false}
+            width={34}
+          />
+          <Tooltip content={<ChartTooltip />} />
+          <Legend
+            wrapperStyle={{ fontSize: 12, color: COLORS.inkSoft, paddingTop: 12 }}
+            iconType="circle"
+            iconSize={8}
+          />
+          <Line
+            yAxisId="temp"
+            type="monotone"
+            dataKey="temperature"
+            stroke={COLORS.temp}
+            strokeWidth={2}
+            dot={false}
+            name={t("sensors.temperatureChart")}
+            isAnimationActive={false}
+          />
+          <Line
+            yAxisId="hum"
+            type="monotone"
+            dataKey="humidity"
+            stroke={COLORS.humidity}
+            strokeWidth={2}
+            dot={false}
+            name={t("sensors.humidityChart")}
+            isAnimationActive={false}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
