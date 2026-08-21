@@ -1,101 +1,167 @@
-import Image from "next/image";
+import Link from "next/link"
+import Image from "next/image"
+import { createClient } from "@/lib/supabase-server"
 
-export default function Home() {
+// Interfaz TypeScript para los datos obtenidos de la API externa de GitHub
+interface GitHubUser {
+  login: string
+  name: string
+  avatar_url: string
+  bio: string
+  public_repos: number
+  followers: number
+  html_url: string
+}
+
+// Función helper para consumir la API REST pública de GitHub
+async function getGitHubProfile(username: string): Promise<GitHubUser | null> {
+  try {
+    const res = await fetch(`https://api.github.com/users/${username}`, {
+      next: { revalidate: 3600 }, // Caché dinámico de 1 hora
+    })
+
+    if (!res.ok) return null
+    return await res.json()
+  } catch (error) {
+    console.error(`Error consultando API de GitHub para ${username}:`, error)
+    return null
+  }
+}
+
+export default async function HomePage() {
+  const supabase = await createClient()
+
+  // 1. Consultar publicaciones activas en Supabase
+  const { data: mentorias } = await supabase
+    .from("mentorias")
+    .select(`
+      id,
+      titulo,
+      descripcion,
+      idioma_o_tecnologia,
+      duracion_minutos,
+      profiles:mentor_id (full_name, github_username)
+    `)
+    .eq("estado", "activa")
+    .order("created_at", { ascending: false })
+    .limit(6)
+
+  // 2. Consumir API Externa para perfiles de mentores destacados (ejemplos predefinidos + dynamic fetch)
+  const mentoresDestacados = ["torvalds", "gaearon", "suckarpunch"]
+  const perfilesGitHub = await Promise.all(
+    mentoresDestacados.map((user) => getGitHubProfile(user))
+  )
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="max-w-7xl mx-auto px-6 py-12 space-y-16">
+      {/* Hero Section */}
+      <section className="text-center space-y-6 max-w-3xl mx-auto">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Aprende Código e Idiomas con <span className="text-indigo-400">Mentores Expertos</span>
+        </h1>
+        <p className="text-slate-400 text-lg">
+          Conecta con instructores calificados, postula a sesiones personalizadas y potencia tus habilidades tecnicas.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Link
+            href="/register"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-3 rounded-lg transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
+            Comenzar Ahora
+          </Link>
           <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#mentorias"
+            className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-6 py-3 rounded-lg transition-colors border border-slate-700"
           >
-            Read our docs
+            Explorar Mentorías
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </section>
+
+      {/* Sección 1: Mentorías Disponibles (Datos de Supabase) */}
+      <section id="mentorias" className="space-y-6">
+        <div className="flex justify-between items-end border-b border-slate-800 pb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Mentorías Recientes</h2>
+            <p className="text-slate-400 text-sm">Explora las últimas ofertas publicadas</p>
+          </div>
+        </div>
+
+        {!mentorias || mentorias.length === 0 ? (
+          <div className="bg-slate-800/50 rounded-xl p-8 text-center border border-slate-800">
+            <p className="text-slate-400">Aún no hay mentorías activas en la plataforma.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {mentorias.map((m: any) => (
+              <div
+                key={m.id}
+                className="bg-slate-800 rounded-xl p-6 border border-slate-700 flex flex-col justify-between hover:border-slate-600 transition-colors"
+              >
+                <div className="space-y-3">
+                  <span className="text-xs font-semibold bg-indigo-500/10 text-indigo-400 px-2.5 py-1 rounded-full border border-indigo-500/20">
+                    {m.idioma_o_tecnologia}
+                  </span>
+                  <h3 className="text-lg font-bold text-white">{m.titulo}</h3>
+                  <p className="text-slate-400 text-sm line-clamp-2">{m.descripcion}</p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
+                  <span>Por: {m.profiles?.full_name ?? "Mentor"}</span>
+                  <Link
+                    href={`/mentorias/${m.id}`}
+                    className="text-indigo-400 hover:underline font-medium"
+                  >
+                    Ver detalle &rarr;
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Sección 2: Consumo de API Externa de GitHub */}
+      <section className="space-y-6 bg-slate-800/40 p-8 rounded-2xl border border-slate-800">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Comunidad de Mentores en GitHub</h2>
+          <p className="text-slate-400 text-sm">
+            Datos integrados en tiempo real mediante la GitHub REST API
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {perfilesGitHub.map((profile) =>
+            profile ? (
+              <div
+                key={profile.login}
+                className="bg-slate-800 rounded-xl p-5 border border-slate-700 space-y-4"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.name ?? profile.login}
+                    className="w-12 h-12 rounded-full border border-slate-600"
+                  />
+                  <div>
+                    <h4 className="font-bold text-white">{profile.name ?? profile.login}</h4>
+                    <p className="text-xs text-indigo-400">@{profile.login}</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-400 line-clamp-2">
+                  {profile.bio ?? "Desarrollador activo en la comunidad Open Source."}
+                </p>
+
+                <div className="flex justify-between text-xs text-slate-500 pt-2 border-t border-slate-700">
+                  <span>Repositorios: {profile.public_repos}</span>
+                  <span>Seguidores: {profile.followers}</span>
+                </div>
+              </div>
+            ) : null
+          )}
+        </div>
+      </section>
+    </main>
+  )
 }
