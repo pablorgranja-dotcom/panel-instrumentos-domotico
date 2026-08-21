@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -34,3 +35,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+=======
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Variables de entorno (¡Nunca subas tus contraseñas o claves!)
+.env
+
+# Archivos de base de datos SQLite (opcional, pero recomendado para que el profe cree la suya)
+*.sqlite3
+*.sqlite
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+>>>>>>> origin/main

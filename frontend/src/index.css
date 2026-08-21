@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  /* Tipografía: Space Grotesk para interfaz, JetBrains Mono para lecturas digitales */
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Superficies */
+  --color-base: #14171c;
+  --color-surface: #1b1f26;
+  --color-surface-hover: #20252d;
+  --color-line: #2a2f38;
+  --color-line-strong: #3a4048;
+
+  /* Texto */
+  --color-ink: #eef0f2;
+  --color-ink-soft: #9aa1ab;
+  --color-ink-faint: #6b7280;
+
+  /* Acentos de datos (reservados para temperatura / humedad) */
+  --color-temp: #e8935a;
+  --color-temp-dim: #5a4531;
+  --color-humidity: #4fb8c4;
+  --color-humidity-dim: #2f4d51;
+
+  /* Estado y acción */
+  --color-online: #3ea56d;
+  --color-offline: #e5534b;
+  --color-action: #5b8def;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-base);
+  color: var(--color-ink);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(91, 141, 239, 0.08), transparent),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: auto, 48px 48px, 48px 48px;
+  min-height: 100vh;
+}
+
+/* Aspecto de esfera nativa del input date acorde al tema oscuro */
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-faint);
+}
+
+* {
+  scrollbar-color: var(--color-line-strong) var(--color-base);
+}
