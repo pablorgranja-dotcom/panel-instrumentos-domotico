@@ -20,7 +20,7 @@ export default async function Navbar() {
         fullName = profile?.full_name
     }
 
-    // Server Action para cerrar sesión de forma segura desde el servidor
+    // Server Action para cerrar sesión
     async function handleSignOut() {
         "use server"
         const supabase = await createClient()
@@ -46,7 +46,8 @@ export default async function Navbar() {
                                 Dashboard
                             </Link>
 
-                            {userRole === "mentor" && (
+                            {/* Mentores y Administradores pueden ver el botón de creación */}
+                            {(userRole === "mentor" || userRole === "administrador") && (
                                 <Link
                                     href="/dashboard/nueva-mentoria"
                                     className="text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 px-3 py-1.5 rounded-full transition-colors"
@@ -62,7 +63,6 @@ export default async function Navbar() {
                                     </span>
                                 )}
 
-                                {/* Botón de Cierre de Sesión */}
                                 <form action={handleSignOut}>
                                     <button
                                         type="submit"
